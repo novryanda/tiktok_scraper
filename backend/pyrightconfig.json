@@ -1,0 +1,16 @@
+{
+  "//": "Konfigurasi Pylance/Pyright untuk backend TikTok.",
+  "//2": "extraPaths agar import dari engine/ (mis. tiktok_scraper) terdeteksi.",
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": ["engine"],
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none",
+  "typeCheckingMode": "basic",
+  "reportOptionalMemberAccess": "none",
+  "reportArgumentType": "none",
+  "reportCallIssue": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportUnusedExcept": "none",
+  "reportTypedDictNotRequiredAccess": "none"
+}

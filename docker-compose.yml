@@ -1,0 +1,121 @@
+# ═════════════════════════════════════════════════════════════════════════════
+# TikTok Scraper — Docker Compose
+# ═════════════════════════════════════════════════════════════════════════════
+#
+# Cara pakai:
+#   1. Edit .env (atur APP_PORT, BACKEND_PORT, dll)
+#   2. docker compose up --build -d
+#   3. Buka http://<host>:${APP_PORT} (default: http://localhost:3000)
+#
+# Untuk push ke Docker Hub:
+#   docker compose build
+#   docker tag tiktok-scraper-ui-backend rezeki1/tiktok-scraper-backend:latest
+#   docker tag tiktok-scraper-ui-frontend rezeki1/tiktok-scraper-frontend:latest
+#   docker push rezeki1/tiktok-scraper-backend:latest
+#   docker push rezeki1/tiktok-scraper-frontend:latest
+# ═════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Backend: FastAPI + Playwright + TikTok Engine ────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: rezeki1/tiktok-scraper-backend:latest
+    container_name: tiktok-backend
+    restart: unless-stopped
+
+    # Chrome butuh /dev/shm besar agar tidak crash saat rendering halaman
+    shm_size: "2gb"
+
+    ports:
+      # Expose backend — port dikonfigurasi via BACKEND_PORT di .env
+      - "${BACKEND_PORT:-8001}:8001"
+
+    # Baca semua variabel dari file .env di root project
+    env_file:
+      - .env
+
+    environment:
+      # Docker-specific — override nilai dari .env yang tidak relevan untuk container
+      TIKTOK_ENGINE_DIR: /app/engine
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    volumes:
+      # Data persisten — tidak hilang saat container di-restart/rebuild
+      - session_data:/app/engine/session
+      - output_video:/app/engine/output_tiktok
+      - output_profile:/app/engine/output_tiktok_profiles
+      - chrome_profile:/app/engine/tiktok_chrome_real_profile
+      - chrome_persistent:/app/tiktok_cookie_profile_persistent
+      - search_cookie:/app/tiktok_search_cookie_profile
+
+    networks:
+      - scraper_net
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+
+  # ── Frontend: Next.js Standalone ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: rezeki1/tiktok-scraper-frontend:latest
+    container_name: tiktok-frontend
+    restart: unless-stopped
+
+    ports:
+      # Port dikonfigurasi via APP_PORT di .env (default: 3000)
+      - "${APP_PORT:-3000}:3000"
+
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      # BACKEND_URL sudah di-bake ke image saat build (http://backend:8001)
+      # Tidak perlu di-set di sini kecuali backend di host berbeda
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    networks:
+      - scraper_net
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+
+# ── Named volumes ─────────────────────────────────────────────────────────
+volumes:
+  session_data:
+    name: tiktok_session_data
+  output_video:
+    name: tiktok_output_video
+  output_profile:
+    name: tiktok_output_profile
+  chrome_profile:
+    name: tiktok_chrome_profile
+  chrome_persistent:
+    name: tiktok_chrome_persistent
+  search_cookie:
+    name: tiktok_search_cookie
+
+
+# ── Internal network ──────────────────────────────────────────────────────
+networks:
+  scraper_net:
+    name: tiktok_scraper_network
+    driver: bridge

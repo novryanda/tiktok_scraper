@@ -1,0 +1,60 @@
+# ── Python artifacts ──────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# ── Virtual environment ───────────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Sensitive / runtime data (akan diisi oleh volumes) ───────────────────
+engine/session/
+engine/output_tiktok/
+engine/output_tiktok_profiles/
+engine/tiktok_chrome_real_profile/
+tiktok_cookie_profile_persistent/
+tiktok_search_cookie_profile/
+_tmp_scripts/
+_tmp_search/
+
+# ── Chrome profile data (biner besar, tidak relevan untuk image) ─────────
+*.pma
+*.db
+*.db-journal
+
+# ── Debug artifacts ───────────────────────────────────────────────────────
+debug_*.html
+debug_*.png
+*.log
+
+# ── Dev & test files ──────────────────────────────────────────────────────
+test_*.py
+diagnose.py
+
+# ── OS files ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ───────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+pyrightconfig.json
+
+# ── Env files (credentials tidak boleh masuk image) ──────────────────────
+.env
+.env.*
+!.env.example
+engine/.env
+
+# ── Bat scripts (Windows only) ────────────────────────────────────────────
+*.bat
+
+# ── Git ───────────────────────────────────────────────────────────────────
+.git/
+.gitignore

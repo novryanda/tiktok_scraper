@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Space Mono", ui-monospace, monospace;
+  --tt-cyan: #00f2ea;
+  --tt-red: #ff0050;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Atmosfer: dua glow cyan + merah di pojok, khas vibe TikTok */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(0, 242, 234, 0.10), transparent 40%),
+    radial-gradient(circle at 88% 92%, rgba(255, 0, 80, 0.10), transparent 40%),
+    #000;
+}
+
+/* ── Glass surfaces ─────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Inputs ─────────────────────────────────────────────── */
+.input-glass {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-glass::placeholder { color: rgba(255, 255, 255, 0.3); }
+.input-glass:focus { border-color: var(--tt-cyan); }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.2s;
+}
+.btn-glass:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+
+/* Tombol aksen TikTok: cyan→merah dengan sedikit glitch shadow */
+.btn-tt {
+  background: linear-gradient(95deg, var(--tt-cyan), var(--tt-red));
+  border: none;
+  border-radius: 0.75rem;
+  color: #000;
+  font-weight: 700;
+  transition: all 0.2s;
+  box-shadow: 0 0 0 0 rgba(0, 242, 234, 0.5);
+}
+.btn-tt:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: -3px 0 12px rgba(255, 0, 80, 0.4), 3px 0 12px rgba(0, 242, 234, 0.4);
+}
+
+/* Teks gradien TikTok */
+.tt-text {
+  background: linear-gradient(95deg, var(--tt-cyan), var(--tt-red));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 999px; transition: width 0.4s; }
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 1.2s linear infinite; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }

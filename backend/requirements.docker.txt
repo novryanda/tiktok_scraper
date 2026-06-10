@@ -1,0 +1,24 @@
+# ── requirements.docker.txt ───────────────────────────────────────────────
+# Versi ringan untuk Docker deployment dengan SENTIMENT_MODE=rule_only
+# torch & transformers TIDAK diinstall → image ~1GB lebih kecil
+#
+# Untuk mengaktifkan ML sentiment (SENTIMENT_MODE=hybrid):
+#   1. Ganti COPY requirements.docker.txt → requirements.txt di Dockerfile
+#   2. Uncomment baris torch & transformers di bawah
+#   3. Rebuild image (image akan ~4GB lebih besar)
+
+# ── Bridge FastAPI ─────────────────────────────────────────────────────────
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5
+python-dotenv>=1.0
+
+# ── Engine TikTok ──────────────────────────────────────────────────────────
+playwright>=1.42
+colorama>=0.4.6
+emoji>=2.10
+langdetect>=1.0.9
+
+# ── ML Sentiment (opsional, aktifkan untuk SENTIMENT_MODE=hybrid) ─────────
+# transformers>=4.38
+# torch>=2.2

@@ -1,0 +1,21 @@
+# ── Bridge FastAPI ────────────────────────────────────────────
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5
+python-dotenv>=1.0
+
+# ── Engine TikTok (dibutuhkan file scraper kamu) ──────────────
+playwright>=1.42
+colorama>=0.4.6
+emoji>=2.10
+langdetect>=1.0.9
+
+# ── Sentiment (IndoBERT) ──────────────────────────────────────
+transformers>=4.38
+torch>=2.2
+
+# ── Opsional: Gemini validator (kalau GEMINI_ENABLED=True) ────
+# google-generativeai>=0.4
+
+# ── Opsional: visualizer growth (matplotlib) ──────────────────
+# matplotlib>=3.8
