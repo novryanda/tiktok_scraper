@@ -1,0 +1,109 @@
+# ═════════════════════════════════════════════════════════════════════════════
+# TikTok Scraper Backend — Docker Compose (Dokploy)
+# ═════════════════════════════════════════════════════════════════════════════
+#
+# Deploy di Dokploy:
+#   1. Buat project Compose, set Root Directory = backend/
+#   2. Compose file = docker-compose.yml
+#   3. Masukkan variabel environment di panel Dokploy (lihat .env.example)
+#   4. Semua nilai di bawah memakai ${VAR:-default} → dibaca dari panel Dokploy
+#
+# Catatan:
+#   - Jangan pakai env_file — env dikelola sepenuhnya lewat panel Dokploy
+#   - Port internal container tetap 8001; BACKEND_PORT hanya untuk mapping host
+#   - Volume named dipakai agar session/cookie/output tidak hilang saat redeploy
+# ═════════════════════════════════════════════════════════════════════════════
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+    # Chrome/Playwright butuh shared memory besar
+    shm_size: "2gb"
+
+    ports:
+      - "${BACKEND_PORT:-8001}:8001"
+
+    environment:
+      # ── Server / Bridge ─────────────────────────────────────────────────
+      BACKEND_PORT: ${BACKEND_PORT:-8001}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      UVICORN_RELOAD: ${UVICORN_RELOAD:-False}
+
+      # ── Path & runtime Docker ───────────────────────────────────────────
+      TIKTOK_ENGINE_DIR: ${TIKTOK_ENGINE_DIR:-/app/engine}
+      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
+      PYTHONDONTWRITEBYTECODE: ${PYTHONDONTWRITEBYTECODE:-1}
+
+      # ── Timeout job (detik) ─────────────────────────────────────────────
+      TIKTOK_VIDEO_TIMEOUT: ${TIKTOK_VIDEO_TIMEOUT:-900}
+      TIKTOK_PROFILE_TIMEOUT: ${TIKTOK_PROFILE_TIMEOUT:-300}
+      TIKTOK_CHECKPOINT_TIMEOUT: ${TIKTOK_CHECKPOINT_TIMEOUT:-3600}
+      TIKTOK_JOB_TTL: ${TIKTOK_JOB_TTL:-3600}
+
+      # ── Engine TikTok / Playwright ──────────────────────────────────────
+      TIKTOK_HEADLESS: ${TIKTOK_HEADLESS:-True}
+      CHROME_NO_SANDBOX: ${CHROME_NO_SANDBOX:-True}
+      TIKTOK_SCRAPER_CLASS: ${TIKTOK_SCRAPER_CLASS:-TikTokScraperV58}
+      TIKTOK_DEBUG: ${TIKTOK_DEBUG:-False}
+      TIKTOK_DEBUG_HTML: ${TIKTOK_DEBUG_HTML:-false}
+
+      # ── Proxy (opsional) ────────────────────────────────────────────────
+      TIKTOK_PROXY: ${TIKTOK_PROXY:-}
+      TIKTOK_PROXY_SERVER: ${TIKTOK_PROXY_SERVER:-}
+      TIKTOK_PROXY_USER: ${TIKTOK_PROXY_USER:-}
+      TIKTOK_PROXY_PASS: ${TIKTOK_PROXY_PASS:-}
+      TIKTOK_PROXY_SESSION: ${TIKTOK_PROXY_SESSION:-}
+
+      # ── Scrape limits & delay ───────────────────────────────────────────
+      TIKTOK_MAX_COMMENTS: ${TIKTOK_MAX_COMMENTS:-100}
+      TIKTOK_DELAY_BETWEEN_REQUESTS: ${TIKTOK_DELAY_BETWEEN_REQUESTS:-5}
+      TIKTOK_DELAY_BETWEEN_PROFILES: ${TIKTOK_DELAY_BETWEEN_PROFILES:-10}
+      TIKTOK_MAX_FOLLOWERS: ${TIKTOK_MAX_FOLLOWERS:-200}
+      TIKTOK_MAX_FOLLOWING: ${TIKTOK_MAX_FOLLOWING:-200}
+      TIKTOK_SCRAPE_LISTS: ${TIKTOK_SCRAPE_LISTS:-False}
+      TIKTOK_CAPTCHA_TIMEOUT: ${TIKTOK_CAPTCHA_TIMEOUT:-180}
+      TIKTOK_BATCH_COOLDOWN_MIN: ${TIKTOK_BATCH_COOLDOWN_MIN:-60}
+      TIKTOK_BATCH_COOLDOWN_MAX: ${TIKTOK_BATCH_COOLDOWN_MAX:-120}
+      TIKTOK_CHECKPOINT_SORT_TYPE: ${TIKTOK_CHECKPOINT_SORT_TYPE:-0}
+
+      # ── Warmup anti-CAPTCHA ─────────────────────────────────────────────
+      TIKTOK_SKIP_WARMUP: ${TIKTOK_SKIP_WARMUP:-False}
+      TIKTOK_WARMUP_SECONDS: ${TIKTOK_WARMUP_SECONDS:-30}
+      TIKTOK_WARMUP_MIN: ${TIKTOK_WARMUP_MIN:-25}
+      TIKTOK_WARMUP_MAX: ${TIKTOK_WARMUP_MAX:-45}
+
+      # ── Search profile ──────────────────────────────────────────────────
+      TIKTOK_SEARCH_PROFILE_DIR: ${TIKTOK_SEARCH_PROFILE_DIR:-tiktok_search_cookie_profile}
+
+      # ── Sentiment / Gemini (opsional) ───────────────────────────────────
+      SENTIMENT_MODE: ${SENTIMENT_MODE:-rule_only}
+      GEMINI_ENABLED: ${GEMINI_ENABLED:-False}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_CONFIDENCE_THRESHOLD: ${GEMINI_CONFIDENCE_THRESHOLD:-0.70}
+
+    volumes:
+      - session_data:/app/engine/session
+      - output_video:/app/engine/output_tiktok
+      - output_profile:/app/engine/output_tiktok_profiles
+      - chrome_profile:/app/engine/tiktok_chrome_real_profile
+      - chrome_persistent:/app/tiktok_cookie_profile_persistent
+      - search_cookie:/app/tiktok_search_cookie_profile
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  session_data:
+  output_video:
+  output_profile:
+  chrome_profile:
+  chrome_persistent:
+  search_cookie:
